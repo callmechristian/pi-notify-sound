@@ -26,11 +26,13 @@ export const BUNDLED_SOUNDS_DIR = join(
 	"sounds",
 );
 
-/** Bundled sound file per event — the value behind `sound: "default"`. */
+/** Bundled sound file per event — the value behind `sound: "default"`.
+ * dingding for everything; the grand-piano sample is reserved for errors. */
 export const BUNDLED_SOUND_BY_EVENT: Record<NotifyEventKey, string> = {
-	agent_settled: "818998__allesyt__studio-grand-notification.wav",
+	agent_settled: "723291__glitched7777__dingding.wav",
 	ask_user_prompt: "723291__glitched7777__dingding.wav",
 	permission_request: "723291__glitched7777__dingding.wav",
+	tool_error: "818998__allesyt__studio-grand-notification.wav",
 };
 
 /** Absolute path of a bundled sound file. */
@@ -45,6 +47,7 @@ export const DEFAULT_CONFIG: NotifySoundConfig = {
 		agent_settled: { sound: "default" },
 		ask_user_prompt: { sound: "default" },
 		permission_request: { sound: "default" },
+		tool_error: { sound: "default" },
 	},
 };
 

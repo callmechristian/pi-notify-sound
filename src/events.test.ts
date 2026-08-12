@@ -8,6 +8,7 @@ const fixedConfig: NotifySoundConfig = {
 		agent_settled: { sound: "default" },
 		ask_user_prompt: { sound: "default" },
 		permission_request: { sound: null },
+		tool_error: { sound: "default" },
 	},
 };
 
@@ -95,6 +96,20 @@ describe("wireEvents", () => {
 		wire(pi);
 		handlerFor(pi, "rpiv:ask-user:prompt")({});
 		expect(playSound).toHaveBeenCalledWith("bundled-ask_user_prompt.wav");
+	});
+
+	it("plays the grand-piano sound when a tool call fails", () => {
+		const pi = makePi();
+		wire(pi);
+		handlerFor(pi, "tool_execution_end")({ isError: true });
+		expect(playSound).toHaveBeenCalledWith("bundled-tool_error.wav");
+	});
+
+	it("stays silent when a tool call succeeds", () => {
+		const pi = makePi();
+		wire(pi);
+		handlerFor(pi, "tool_execution_end")({ isError: false });
+		expect(playSound).not.toHaveBeenCalled();
 	});
 
 	it("does not play for a disabled event (sound: null)", () => {

@@ -9,8 +9,9 @@ terminal and still hear when it's your turn.
 | Moment | Event | Default sound |
 | -------- | ------- | --------------- |
 | Agent fully done (no retry/compaction/follow-up pending) | `agent_settled` | `complete` |
-| Questionnaire awaiting your answer | `rpiv:ask-user:prompt` | `question` |
-| Permission prompt awaiting a decision | `permissions:ui_prompt` | `question` |
+| Questionnaire awaiting your answer | `rpiv:ask-user:prompt` | dingding |
+| Permission prompt awaiting a decision | `permissions:ui_prompt` | dingding |
+| A tool call failed | `tool_execution_end` (`isError`) | grand piano |
 
 `agent_settled` is used instead of `agent_end` because `agent_end` fires
 before pi decides whether to auto-retry, compact-and-retry, or run follow-ups.
@@ -50,7 +51,8 @@ bundled sound:
   "events": {
     "agent_settled":       { "sound": "default" },
     "ask_user_prompt":     { "sound": "default" },
-    "permission_request":  { "sound": "default" }
+    "permission_request":  { "sound": "default" },
+    "tool_error":          { "sound": "default" }
   }
 }
 ```
@@ -58,7 +60,7 @@ bundled sound:
 - `sound: false` mutes everything.
 - Each `events.<key>.sound` is one of:
   - `"default"` — the bundled default sound for that event
-    (agent done → studio-grand notification; questions/permissions → dingding)
+    (dingding for everything; the grand-piano sample plays only for tool errors)
   - `null` — disabled, no sound
   - an absolute wav path — a custom sound (missing files fall back to the bundled default)
 - Config is read at fire-time — edits apply without a reload.
@@ -67,8 +69,9 @@ bundled sound:
 
 The package bundles two short freesound.org samples:
 
-- `studio-grand-notification.wav` — agent done (`sound: "default"`)
-- `dingding.wav` — questions and permission prompts
+- `dingding.wav` — the default for every event (`sound: "default"`)
+- `studio-grand-notification.wav` — reserved for tool errors (the `tool_error`
+  event plays it when a tool call fails)
 
 Override with a custom wav path per event, or disable an event with `null`.
 

@@ -88,13 +88,16 @@ describe("ensureConfigFile", () => {
 describe("resolveEventSound", () => {
 	it('resolves "default" to the per-event bundled sound', () => {
 		expect(resolveEventSound(DEFAULT_CONFIG, "agent_settled")).toMatch(
-			/studio-grand-notification\.wav$/,
+			/dingding\.wav$/,
 		);
 		expect(resolveEventSound(DEFAULT_CONFIG, "ask_user_prompt")).toMatch(
 			/dingding\.wav$/,
 		);
 		expect(resolveEventSound(DEFAULT_CONFIG, "permission_request")).toMatch(
 			/dingding\.wav$/,
+		);
+		expect(resolveEventSound(DEFAULT_CONFIG, "tool_error")).toMatch(
+			/studio-grand-notification\.wav$/,
 		);
 	});
 
@@ -119,7 +122,7 @@ describe("resolveEventSound", () => {
 			agent_settled: { sound: "Z:\\definitely-missing.wav" },
 		});
 		expect(resolveEventSound(missing, "agent_settled")).toMatch(
-			/studio-grand-notification\.wav$/,
+			/dingding\.wav$/,
 		);
 	});
 

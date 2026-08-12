@@ -65,6 +65,11 @@ export function wireEvents(pi: ExtensionAPI): void {
 			playFor("permission_request"),
 		),
 	);
+
+	// Tool failures — the error sound. Fires after every failed tool call.
+	pi.on("tool_execution_end", (event) => {
+		if ((event as { isError?: boolean }).isError) playFor("tool_error");
+	});
 }
 
 /** Called on session_shutdown to release pi.events.on listeners. */

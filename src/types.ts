@@ -6,7 +6,8 @@
 export type NotifyEventKey =
 	| "agent_settled"
 	| "ask_user_prompt"
-	| "permission_request";
+	| "permission_request"
+	| "tool_error";
 
 /**
  * Per-event sound value:

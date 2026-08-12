@@ -22,6 +22,7 @@ const EVENT_KEYS: ReadonlyArray<NotifyEventKey> = [
 	"agent_settled",
 	"ask_user_prompt",
 	"permission_request",
+	"tool_error",
 ];
 
 /** Friendly aliases for /notify-sound test arguments. */
@@ -32,6 +33,8 @@ const EVENT_ALIASES: Record<string, NotifyEventKey> = {
 	question: "ask_user_prompt",
 	permission_request: "permission_request",
 	permission: "permission_request",
+	tool_error: "tool_error",
+	error: "tool_error",
 };
 
 export default function (pi: ExtensionAPI): void {
