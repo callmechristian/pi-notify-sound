@@ -34,7 +34,8 @@ describe("loadConfig", () => {
 			const cfg = loadConfig(p);
 			expect(cfg.sound).toBe(true);
 			expect(cfg.events.agent_settled.enabled).toBe(true);
-			expect(cfg.sounds.complete).toBe("");
+			expect(cfg.sounds.complete).toBe(DEFAULT_CONFIG.sounds.complete);
+			expect(cfg.sounds.complete).toMatch(/\.wav$/);
 		} finally {
 			cleanup(p);
 		}
@@ -48,7 +49,7 @@ describe("loadConfig", () => {
 			const cfg = loadConfig(p);
 			expect(cfg.sound).toBe(false);
 			expect(cfg.sounds.complete).toBe("C:\\x.wav");
-			expect(cfg.sounds.question).toBe("");
+			expect(cfg.sounds.question).toBe(DEFAULT_CONFIG.sounds.question);
 			expect(cfg.events.ask_user_prompt.enabled).toBe(true);
 		} finally {
 			cleanup(p);
@@ -104,8 +105,19 @@ describe("resolveSoundPath", () => {
 		expect(resolveSoundPath(cfg, undefined)).toBe("d.wav");
 	});
 
-	it("returns null when nothing is configured", () => {
-		expect(resolveSoundPath(DEFAULT_CONFIG, "complete")).toBeNull();
-		expect(resolveSoundPath(DEFAULT_CONFIG)).toBeNull();
+	it("resolves bundled defaults for every sound key", () => {
+		expect(resolveSoundPath(DEFAULT_CONFIG, "complete")).toMatch(/studio-grand-notification\.wav$/);
+		expect(resolveSoundPath(DEFAULT_CONFIG, "question")).toMatch(/dingding\.wav$/);
+		expect(resolveSoundPath(DEFAULT_CONFIG, "error")).toMatch(/\.wav$/);
+		expect(resolveSoundPath(DEFAULT_CONFIG)).toMatch(/\.wav$/);
+	});
+
+	it("returns null when no sounds are configured", () => {
+		const empty = {
+			...DEFAULT_CONFIG,
+			sounds: { default: "", complete: "", question: "", error: "" },
+		};
+		expect(resolveSoundPath(empty, "complete")).toBeNull();
+		expect(resolveSoundPath(empty)).toBeNull();
 	});
 });

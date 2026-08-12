@@ -34,17 +34,13 @@ Then run `/reload` in pi.
 
 ## Config
 
-`~/.pi/notify-sound/config.json` (created as a template on first run):
+`~/.pi/notify-sound/config.json`. The extension ships with bundled sounds
+(`src/sounds/`), so a fresh install plays out of the box — the config only needs
+to exist if you want to override them:
 
 ```json
 {
   "sound": true,
-  "sounds": {
-    "default": "E:\\Downloads\\SFX\\pcm\\tienes-un-mensaje-short.wav",
-    "complete": "E:\\Downloads\\SFX\\pcm\\tienes-un-mensaje-short.wav",
-    "question": "E:\\Downloads\\SFX\\pcm\\whats-up-doc.wav",
-    "error": "E:\\Downloads\\SFX\\pcm\\windows-xp-error.wav"
-  },
   "events": {
     "agent_settled":       { "enabled": true, "sound": "complete" },
     "ask_user_prompt":     { "enabled": true, "sound": "question" },
@@ -54,10 +50,19 @@ Then run `/reload` in pi.
 ```
 
 - `sound: false` mutes everything.
-- `sounds` maps a name to an absolute wav path. `default` is the fallback
-  when an event has no `sound` set.
+- `sounds` maps a name to an absolute wav path (optional — bundled sounds are
+  the default). `default` is the fallback when an event has no `sound` set.
 - Each `events.<key>.sound` is either a key into `sounds` or a direct wav path.
 - Config is read at fire-time — edits apply without a reload.
+
+## Bundled sounds
+
+The package bundles two short freesound.org samples:
+
+- `studio-grand-notification.wav` — complete / error / default
+- `dingding.wav` — questions and permission prompts
+
+Override any of them via `sounds` in the config with your own wav paths.
 
 ## Verify
 

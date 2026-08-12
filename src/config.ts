@@ -9,15 +9,35 @@
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
 import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { NotifySoundConfig, NotifyEventKey, SoundKey } from "./types.js";
 
 export const CONFIG_DIR = join(homedir(), ".pi", "notify-sound");
 export const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 
-/** Defaults — no machine-specific paths; events enabled but silent until configured. */
+/** Directory of bundled sounds, resolved relative to this module (works from the repo, a junction, or a pi-installed package). */
+export const BUNDLED_SOUNDS_DIR = join(
+	dirname(fileURLToPath(import.meta.url)),
+	"sounds",
+);
+
+/** Absolute path of a bundled sound file. */
+export function bundledSoundPath(file: string): string {
+	return join(BUNDLED_SOUNDS_DIR, file);
+}
+
+/**
+ * Defaults — bundled notification sounds (no machine-specific paths).
+ * Users override via ~/.pi/notify-sound/config.json.
+ */
 export const DEFAULT_CONFIG: NotifySoundConfig = {
 	sound: true,
-	sounds: { default: "", complete: "", question: "", error: "" },
+	sounds: {
+		default: bundledSoundPath("818998__allesyt__studio-grand-notification.wav"),
+		complete: bundledSoundPath("818998__allesyt__studio-grand-notification.wav"),
+		question: bundledSoundPath("723291__glitched7777__dingding.wav"),
+		error: bundledSoundPath("818998__allesyt__studio-grand-notification.wav"),
+	},
 	events: {
 		agent_settled: { enabled: true, sound: "complete" },
 		ask_user_prompt: { enabled: true, sound: "question" },
