@@ -7,7 +7,7 @@ session:
     branch: master
     clean: true
   handoff:
-    next_skill: seed-conventions
+    next_skill: survey-context
 release:
   last_tag: null
   last_publish: null
