@@ -22,7 +22,7 @@ however you prefer:
 
 - **Junction (dev, hot-reload via `/reload`):**
 
-  ```
+  ```powershell
   mklink /J "%USERPROFILE%\.pi\agent\extensions\notify-sound" "E:\Projects\pi-notify-sound"
   ```
 
@@ -76,7 +76,7 @@ Then run `/reload` in pi.
 
 ## Development
 
-```
+```bash
 npm install     # devDeps: typescript, @types/node, pi types
 npx tsc --noEmit
 ```
