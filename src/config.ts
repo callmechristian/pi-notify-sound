@@ -8,7 +8,7 @@
 
 import { existsSync, mkdirSync, readFileSync, writeFileSync } from "node:fs";
 import { homedir } from "node:os";
-import { join } from "node:path";
+import { dirname, join } from "node:path";
 import type { NotifySoundConfig, NotifyEventKey, SoundKey } from "./types.js";
 
 export const CONFIG_DIR = join(homedir(), ".pi", "notify-sound");
@@ -26,10 +26,10 @@ export const DEFAULT_CONFIG: NotifySoundConfig = {
 };
 
 /** Load config from disk, merged over defaults. Never throws. */
-export function loadConfig(): NotifySoundConfig {
+export function loadConfig(path: string = CONFIG_PATH): NotifySoundConfig {
   try {
-    if (existsSync(CONFIG_PATH)) {
-      const raw = JSON.parse(readFileSync(CONFIG_PATH, "utf8")) as Partial<NotifySoundConfig>;
+    if (existsSync(path)) {
+      const raw = JSON.parse(readFileSync(path, "utf8")) as Partial<NotifySoundConfig>;
       return mergeWithDefaults(raw);
     }
   } catch {
@@ -39,11 +39,11 @@ export function loadConfig(): NotifySoundConfig {
 }
 
 /** Write a config template (only if none exists) so the user knows where to look. */
-export function ensureConfigFile(): void {
-  if (existsSync(CONFIG_PATH)) return;
+export function ensureConfigFile(path: string = CONFIG_PATH): void {
+  if (existsSync(path)) return;
   try {
-    mkdirSync(CONFIG_DIR, { recursive: true });
-    writeFileSync(CONFIG_PATH, JSON.stringify(cloneDefaults(), null, 2) + "\n", "utf8");
+    mkdirSync(dirname(path), { recursive: true });
+    writeFileSync(path, JSON.stringify(cloneDefaults(), null, 2) + "\n", "utf8");
   } catch {
     // Non-fatal.
   }
