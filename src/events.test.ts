@@ -1,19 +1,22 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { beforeEach, describe, expect, it, vi } from "vitest";
+import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import type { NotifyEventKey, NotifySoundConfig } from "./types.js";
 
 const fixedConfig: NotifySoundConfig = {
 	sound: true,
+	cooldown_ms: 0,
+	suppressWhenFocused: false,
 	events: {
 		agent_settled: { sound: "default" },
 		ask_user_prompt: { sound: "default" },
 		permission_request: { sound: null },
 		tool_error: { sound: "default" },
+		session_shutdown: { sound: null },
 	},
 };
 
 vi.mock("./config.js", () => ({
-	loadConfig: () => fixedConfig,
+	loadEffectiveConfig: () => fixedConfig,
 	resolveEventSound: (cfg: NotifySoundConfig, eventKey: NotifyEventKey) => {
 		if (!cfg.sound) return null;
 		const sound = cfg.events[eventKey]?.sound;
@@ -26,7 +29,12 @@ vi.mock("./config.js", () => ({
 const { playSound } = vi.hoisted(() => ({ playSound: vi.fn() }));
 vi.mock("./sound.js", () => ({ playSound }));
 
-import { unwireEvents, wireEvents } from "./events.js";
+const { isWindowFocused } = vi.hoisted(() => ({
+	isWindowFocused: vi.fn(async () => false),
+}));
+vi.mock("./focus.js", () => ({ isWindowFocused }));
+
+import { resetPlaybackState, unwireEvents, wireEvents } from "./events.js";
 
 type MockPi = {
 	on: ReturnType<typeof vi.fn>;
@@ -57,7 +65,10 @@ function unwire(): void {
 	unwireEvents();
 }
 
-function handlerFor(pi: MockPi, channel: string): (...args: unknown[]) => void {
+function handlerFor(
+	pi: MockPi,
+	channel: string,
+): (...args: unknown[]) => Promise<void> {
 	const call = pi.on.mock.calls.find((c: string[]) => c[0] === channel);
 	const call2 =
 		call ?? pi.events.on.mock.calls.find((c: string[]) => c[0] === channel);
@@ -67,13 +78,31 @@ function handlerFor(pi: MockPi, channel: string): (...args: unknown[]) => void {
 
 beforeEach(() => {
 	playSound.mockClear();
+	isWindowFocused.mockClear();
+	resetPlaybackState();
+});
+
+afterEach(() => {
+	vi.useRealTimers();
+	fixedConfig.sound = true;
+	fixedConfig.cooldown_ms = 0;
+	fixedConfig.suppressWhenFocused = false;
+	fixedConfig.events.session_shutdown = { sound: null };
 });
 
 describe("wireEvents", () => {
-	it("registers agent_settled via pi.on and prompt events via pi.events.on", () => {
+	it("registers lifecycle and prompt listeners", () => {
 		const pi = makePi();
 		wire(pi);
 		expect(pi.on).toHaveBeenCalledWith("agent_settled", expect.any(Function));
+		expect(pi.on).toHaveBeenCalledWith(
+			"tool_execution_end",
+			expect.any(Function),
+		);
+		expect(pi.on).toHaveBeenCalledWith(
+			"session_shutdown",
+			expect.any(Function),
+		);
 		expect(pi.events.on).toHaveBeenCalledWith(
 			"rpiv:ask-user:prompt",
 			expect.any(Function),
@@ -84,51 +113,100 @@ describe("wireEvents", () => {
 		);
 	});
 
-	it("plays the bundled default sound on agent_settled", () => {
+	it("plays the bundled default sound on agent_settled", async () => {
 		const pi = makePi();
 		wire(pi);
-		handlerFor(pi, "agent_settled")();
+		await handlerFor(pi, "agent_settled")();
 		expect(playSound).toHaveBeenCalledWith("bundled-agent_settled.wav");
 	});
 
-	it("plays the bundled default sound on ask-user prompt", () => {
+	it("plays the bundled default sound on ask-user prompt", async () => {
 		const pi = makePi();
 		wire(pi);
-		handlerFor(pi, "rpiv:ask-user:prompt")({});
+		await handlerFor(pi, "rpiv:ask-user:prompt")({});
 		expect(playSound).toHaveBeenCalledWith("bundled-ask_user_prompt.wav");
 	});
 
-	it("plays the grand-piano sound when a tool call fails", () => {
+	it("plays the grand-piano sound when a tool call fails", async () => {
 		const pi = makePi();
 		wire(pi);
-		handlerFor(pi, "tool_execution_end")({ isError: true });
+		await handlerFor(pi, "tool_execution_end")({ isError: true });
 		expect(playSound).toHaveBeenCalledWith("bundled-tool_error.wav");
 	});
 
-	it("stays silent when a tool call succeeds", () => {
+	it("stays silent when a tool call succeeds", async () => {
 		const pi = makePi();
 		wire(pi);
-		handlerFor(pi, "tool_execution_end")({ isError: false });
+		await handlerFor(pi, "tool_execution_end")({ isError: false });
 		expect(playSound).not.toHaveBeenCalled();
 	});
 
-	it("does not play for a disabled event (sound: null)", () => {
+	it("does not play for a disabled event (sound: null)", async () => {
 		const pi = makePi();
 		wire(pi);
-		handlerFor(pi, "permissions:ui_prompt")({});
+		await handlerFor(pi, "permissions:ui_prompt")({});
 		expect(playSound).not.toHaveBeenCalled();
 	});
 
-	it("silences everything when the master toggle is off", () => {
+	it("stays silent for session_shutdown by default (opt-in)", async () => {
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "session_shutdown")({});
+		expect(playSound).not.toHaveBeenCalled();
+	});
+
+	it("plays for session_shutdown once enabled", async () => {
+		fixedConfig.events.session_shutdown = { sound: "default" };
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "session_shutdown")({});
+		expect(playSound).toHaveBeenCalledWith("bundled-session_shutdown.wav");
+	});
+
+	it("silences everything when the master toggle is off", async () => {
 		fixedConfig.sound = false;
-		try {
-			const pi = makePi();
-			wire(pi);
-			handlerFor(pi, "agent_settled")();
-			expect(playSound).not.toHaveBeenCalled();
-		} finally {
-			fixedConfig.sound = true;
-		}
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "agent_settled")();
+		expect(playSound).not.toHaveBeenCalled();
+	});
+
+	it("dedupes within cooldown_ms and plays again after", async () => {
+		vi.useFakeTimers();
+		vi.setSystemTime(1_000_000);
+		fixedConfig.cooldown_ms = 10_000;
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "agent_settled")();
+		expect(playSound).toHaveBeenCalledTimes(1);
+
+		playSound.mockClear();
+		vi.setSystemTime(1_000_005); // 5ms later — within cooldown
+		await handlerFor(pi, "tool_execution_end")({ isError: true });
+		expect(playSound).not.toHaveBeenCalled();
+
+		vi.setSystemTime(1_010_001); // past the cooldown
+		await handlerFor(pi, "tool_execution_end")({ isError: true });
+		expect(playSound).toHaveBeenCalledWith("bundled-tool_error.wav");
+	});
+
+	it("suppresses playback when the terminal is focused", async () => {
+		fixedConfig.suppressWhenFocused = true;
+		isWindowFocused.mockResolvedValue(true);
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "agent_settled")();
+		expect(isWindowFocused).toHaveBeenCalled();
+		expect(playSound).not.toHaveBeenCalled();
+	});
+
+	it("plays when not focused", async () => {
+		fixedConfig.suppressWhenFocused = true;
+		isWindowFocused.mockResolvedValue(false);
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "agent_settled")();
+		expect(playSound).toHaveBeenCalledWith("bundled-agent_settled.wav");
 	});
 
 	it("unsubscribes previous EventBus listeners on re-registration", () => {
