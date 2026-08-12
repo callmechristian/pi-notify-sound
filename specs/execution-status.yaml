@@ -1,2 +1,10 @@
-# Story/epic status — sole SoT (populated as stories land)
-development_status: {}
+# Story/epic status — sole SoT
+development_status:
+  e01: delivered
+  e02: delivered
+  e02s01: done
+  e02s02: done
+  e02s03: done
+  e02s04: done
+  e02s05: done
+  e02s06: done

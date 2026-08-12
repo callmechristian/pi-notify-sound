@@ -12,6 +12,7 @@ terminal and still hear when it's your turn.
 | Questionnaire awaiting your answer | `rpiv:ask-user:prompt` | dingding |
 | Permission prompt awaiting a decision | `permissions:ui_prompt` | dingding |
 | A tool call failed | `tool_execution_end` (`isError`) | grand piano |
+| Session ends (opt-in) | `session_shutdown` | dingding |
 
 `agent_settled` is used instead of `agent_end` because `agent_end` fires
 before pi decides whether to auto-retry, compact-and-retry, or run follow-ups.
@@ -79,22 +80,32 @@ bundled sound:
 ```json
 {
   "sound": true,
+  "cooldown_ms": 10000,
+  "suppressWhenFocused": false,
   "events": {
     "agent_settled":       { "sound": "default" },
     "ask_user_prompt":     { "sound": "default" },
     "permission_request":  { "sound": "default" },
-    "tool_error":          { "sound": "default" }
+    "tool_error":          { "sound": "default" },
+    "session_shutdown":    { "sound": null }
   }
 }
 ```
 
 - `sound: false` mutes everything.
+- `cooldown_ms` — minimum ms between any two sounds (global dedupe, default
+  10000; 0 disables). Prevents sound storms on tool-error retries.
+- `suppressWhenFocused` — Windows only: skip playback while the pi terminal is
+  the foreground window (default false).
 - Each `events.<key>.sound` is one of:
   - `"default"` — the bundled default sound for that event
     (dingding for everything; the grand-piano sample plays only for tool errors)
   - `null` — disabled, no sound
   - an absolute wav path — a custom sound (missing files fall back to the bundled default)
 - Config is read at fire-time — edits apply without a reload.
+- **Per-project config:** add a `.pi/notify-sound.json` file in a repo to overlay
+  the global config for that project (fields merge; event sounds merge per key).
+  Only applied for trusted projects.
 
 ## Bundled sounds
 

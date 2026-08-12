@@ -1,13 +1,14 @@
 # bigpowers session state — pi-notify-sound
 workflow_mode: solo-git
-active_flow: bootstrap
+active_flow: verify
 session:
   project: pi-notify-sound
+  epic: e02
   git:
     branch: main
-    clean: true
+    clean: false
   handoff:
-    next_skill: survey-context
+    next_skill: verify-work
 release:
   last_tag: null
   last_publish: null
