@@ -10,5 +10,6 @@ Six small improvements to pi-notify-sound. All verified with the existing gates.
 | e02s04 | **Per-project config** — `.pi/notify-sound.json` overlays the global config when the project is trusted | loadProjectConfig + mergeConfigs tests; `npm test` |
 | e02s05 | **Opt-in session-end sound** — `session_shutdown` event, default `null` (silent); `"default"` plays dingding | events.test registration + default/enabled cases |
 | e02s06 | **Test sound dispatch + command parsing** — extract `choosePlayer` / `parseTestTarget` / `buildStatusLines`; `/notify-sound test <path>` reports missing files | sound.test.ts + index.test.ts; `npm test` |
+| e02s07 | **Breaking vs tool errors** — `breaking_error` (run interrupted: `agent_end` final `stopReason` `error`/`aborted`) plays the piano by default; `tool_error` (failed tool call) is opt-in (default `null`) | events.test agent_end cases; `npm test` |
 
 Gates: `npm test` (all suites), `npm run typecheck`, agentic-STE validator on CLAUDE.md/CONVENTIONS.md, specs-yaml validator.

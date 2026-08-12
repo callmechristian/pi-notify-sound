@@ -32,12 +32,15 @@ presents options and, if allowed, writes the config files.
 | `.pi/notify-sound.json` | per-project overlay (trusted projects only) | none |
 
 Bundled sounds: `dingding.wav` is the default for every event; the
-`studio-grand-notification.wav` sample is reserved for `tool_error`.
+`studio-grand-notification.wav` sample is reserved for errors
+(`breaking_error` and, when enabled, `tool_error`).
 Custom sounds: any absolute wav path (missing files fall back to bundled).
 
 Events: `agent_settled` (agent done), `ask_user_prompt` (question),
-`permission_request` (permission prompt), `tool_error` (failed tool call),
-`session_shutdown` (session end — opt-in, default `null`).
+`permission_request` (permission prompt), `tool_error` (failed tool call —
+opt-in, default `null`), `breaking_error` (run interrupted: provider error,
+model stop, user abort — default `"default"` piano), `session_shutdown`
+(session end — opt-in, default `null`).
 
 ## Step 3 — Ask what the user wants
 

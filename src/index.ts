@@ -33,6 +33,10 @@ export const EVENT_ALIASES: Record<string, NotifyEventKey> = {
 	permission: "permission_request",
 	tool_error: "tool_error",
 	error: "tool_error",
+	breaking_error: "breaking_error",
+	breaking: "breaking_error",
+	interrupt: "breaking_error",
+	abort: "breaking_error",
 	session_shutdown: "session_shutdown",
 	exit: "session_shutdown",
 };

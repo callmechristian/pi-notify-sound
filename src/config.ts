@@ -31,6 +31,7 @@ export const ALL_EVENT_KEYS: ReadonlyArray<NotifyEventKey> = [
 	"ask_user_prompt",
 	"permission_request",
 	"tool_error",
+	"breaking_error",
 	"session_shutdown",
 ];
 
@@ -47,6 +48,7 @@ export const BUNDLED_SOUND_BY_EVENT: Record<NotifyEventKey, string> = {
 	ask_user_prompt: "723291__glitched7777__dingding.wav",
 	permission_request: "723291__glitched7777__dingding.wav",
 	tool_error: "818998__allesyt__studio-grand-notification.wav",
+	breaking_error: "818998__allesyt__studio-grand-notification.wav",
 	session_shutdown: "723291__glitched7777__dingding.wav",
 };
 
@@ -65,7 +67,8 @@ export const DEFAULT_CONFIG: NotifySoundConfig = {
 		agent_settled: { sound: "default" },
 		ask_user_prompt: { sound: "default" },
 		permission_request: { sound: "default" },
-		tool_error: { sound: "default" },
+		tool_error: { sound: null },
+		breaking_error: { sound: "default" },
 		session_shutdown: { sound: null },
 	},
 };

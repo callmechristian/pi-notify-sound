@@ -21,7 +21,8 @@ pi for **notify-sound-setup** (a skill shipped with the extension).
 | Agent fully done (no retry/compaction/follow-up pending) | `agent_settled` | `complete` |
 | Questionnaire awaiting your answer | `rpiv:ask-user:prompt` | dingding |
 | Permission prompt awaiting a decision | `permissions:ui_prompt` | dingding |
-| A tool call failed | `tool_execution_end` (`isError`) | grand piano |
+| A tool call failed (opt-in) | `tool_execution_end` (`isError`) | grand piano — off by default |
+| Run interrupted — provider error, model stop, user abort | `agent_end` final `stopReason` = `error`/`aborted` | grand piano |
 | Session ends (opt-in) | `session_shutdown` | dingding |
 
 `agent_settled` is used instead of `agent_end` because `agent_end` fires
@@ -96,7 +97,8 @@ bundled sound:
     "agent_settled":       { "sound": "default" },
     "ask_user_prompt":     { "sound": "default" },
     "permission_request":  { "sound": "default" },
-    "tool_error":          { "sound": "default" },
+    "tool_error":          { "sound": null },
+    "breaking_error":      { "sound": "default" },
     "session_shutdown":    { "sound": null }
   }
 }
@@ -116,6 +118,10 @@ bundled sound:
 - **Per-project config:** add a `.pi/notify-sound.json` file in a repo to overlay
   the global config for that project (fields merge; event sounds merge per key).
   Only applied for trusted projects.
+- **Errors are opt-in except breaking ones:** `breaking_error` (run interrupted —
+  provider timeout, model stop, abort) plays by default; `tool_error` (a failed
+  tool call like a wrong bash command) stays silent unless you set
+  `"tool_error": { "sound": "default" }` or a path explicitly.
 
 ## Bundled sounds
 

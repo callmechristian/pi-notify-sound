@@ -32,6 +32,8 @@ describe("loadConfig", () => {
 			expect(cfg.cooldown_ms).toBe(10_000);
 			expect(cfg.suppressWhenFocused).toBe(false);
 			expect(cfg.events.agent_settled.sound).toBe("default");
+			expect(cfg.events.tool_error.sound).toBeNull();
+			expect(cfg.events.breaking_error.sound).toBe("default");
 			expect(cfg.events.session_shutdown.sound).toBeNull();
 		} finally {
 			cleanup(dir);
@@ -171,7 +173,8 @@ describe("resolveEventSound", () => {
 		expect(resolveEventSound(DEFAULT_CONFIG, "ask_user_prompt")).toMatch(
 			/dingding\.wav$/,
 		);
-		expect(resolveEventSound(DEFAULT_CONFIG, "tool_error")).toMatch(
+		expect(resolveEventSound(DEFAULT_CONFIG, "tool_error")).toBeNull();
+		expect(resolveEventSound(DEFAULT_CONFIG, "breaking_error")).toMatch(
 			/studio-grand-notification\.wav$/,
 		);
 		expect(resolveEventSound(DEFAULT_CONFIG, "session_shutdown")).toBeNull();

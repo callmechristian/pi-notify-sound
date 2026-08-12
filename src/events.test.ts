@@ -10,7 +10,8 @@ const fixedConfig: NotifySoundConfig = {
 		agent_settled: { sound: "default" },
 		ask_user_prompt: { sound: "default" },
 		permission_request: { sound: null },
-		tool_error: { sound: "default" },
+		tool_error: { sound: null },
+		breaking_error: { sound: "default" },
 		session_shutdown: { sound: null },
 	},
 };
@@ -88,6 +89,7 @@ afterEach(() => {
 	fixedConfig.cooldown_ms = 0;
 	fixedConfig.suppressWhenFocused = false;
 	fixedConfig.events.session_shutdown = { sound: null };
+	fixedConfig.events.tool_error = { sound: null };
 });
 
 describe("wireEvents", () => {
@@ -127,11 +129,19 @@ describe("wireEvents", () => {
 		expect(playSound).toHaveBeenCalledWith("bundled-ask_user_prompt.wav");
 	});
 
-	it("plays the grand-piano sound when a tool call fails", async () => {
+	it("plays the grand-piano sound when a tool call fails (explicit flag)", async () => {
+		fixedConfig.events.tool_error = { sound: "default" };
 		const pi = makePi();
 		wire(pi);
 		await handlerFor(pi, "tool_execution_end")({ isError: true });
 		expect(playSound).toHaveBeenCalledWith("bundled-tool_error.wav");
+	});
+
+	it("does not play for tool errors by default (explicit flag required)", async () => {
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "tool_execution_end")({ isError: true });
+		expect(playSound).not.toHaveBeenCalled();
 	});
 
 	it("stays silent when a tool call succeeds", async () => {
@@ -171,7 +181,41 @@ describe("wireEvents", () => {
 		expect(playSound).not.toHaveBeenCalled();
 	});
 
+	it("plays the breaking sound when the run ends with a provider error", async () => {
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "agent_end")({
+			messages: [
+				{ role: "user", content: "x" },
+				{ role: "assistant", stopReason: "error" },
+			],
+		});
+		expect(playSound).toHaveBeenCalledWith("bundled-breaking_error.wav");
+	});
+
+	it("plays the breaking sound when the run is aborted", async () => {
+		const pi = makePi();
+		wire(pi);
+		await handlerFor(pi, "agent_end")({
+			messages: [{ role: "assistant", stopReason: "aborted" }],
+		});
+		expect(playSound).toHaveBeenCalledWith("bundled-breaking_error.wav");
+	});
+
+	it("stays silent on normal completions (stop/tool_use/length)", async () => {
+		const pi = makePi();
+		wire(pi);
+		for (const stopReason of ["stop", "tool_use", "length", undefined]) {
+			playSound.mockClear();
+			await handlerFor(pi, "agent_end")({
+				messages: [{ role: "assistant", stopReason }],
+			});
+			expect(playSound).not.toHaveBeenCalled();
+		}
+	});
+
 	it("dedupes within cooldown_ms and plays again after", async () => {
+		fixedConfig.events.tool_error = { sound: "default" };
 		vi.useFakeTimers();
 		vi.setSystemTime(1_000_000);
 		fixedConfig.cooldown_ms = 10_000;

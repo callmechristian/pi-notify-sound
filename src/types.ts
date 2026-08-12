@@ -8,6 +8,7 @@ export type NotifyEventKey =
 	| "ask_user_prompt"
 	| "permission_request"
 	| "tool_error"
+	| "breaking_error"
 	| "session_shutdown";
 
 /**

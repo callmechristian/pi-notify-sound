@@ -57,6 +57,30 @@ export function resetPlaybackState(): void {
 	sessionCwd = undefined;
 }
 
+/**
+ * Stop reasons meaning the RUN itself was interrupted (breaking) — provider
+ * timeout/error → "error", user/model stop → "aborted". A failed tool call
+ * (wrong bash command) does NOT produce these; the run keeps going.
+ */
+const BREAKING_STOP_REASONS: ReadonlySet<string> = new Set([
+	"error",
+	"aborted",
+]);
+
+/** The breaking stop reason of the final assistant message, or null. */
+function breakingStopReason(messages: unknown): string | null {
+	if (!Array.isArray(messages)) return null;
+	for (let i = messages.length - 1; i >= 0; i--) {
+		const m = messages[i] as { role?: string; stopReason?: string };
+		if (m?.role !== "assistant") continue;
+		return typeof m.stopReason === "string" &&
+			BREAKING_STOP_REASONS.has(m.stopReason)
+			? m.stopReason
+			: null;
+	}
+	return null;
+}
+
 /** Play the sound configured for an event key, respecting cooldown + focus. */
 async function playFor(eventKey: NotifyEventKey): Promise<void> {
 	try {
@@ -104,6 +128,15 @@ export function wireEvents(pi: ExtensionAPI): void {
 	// Tool failures — the error sound. Fires after every failed tool call.
 	pi.on("tool_execution_end", (event) => {
 		if ((event as { isError?: boolean }).isError) void playFor("tool_error");
+	});
+
+	// Breaking interrupts — the run itself stopped with error/abort (provider
+	// timeout, model stopped), not a failed tool call. Cooldown dedupes
+	// auto-retry noise.
+	pi.on("agent_end", (event) => {
+		if (breakingStopReason((event as { messages?: unknown }).messages)) {
+			void playFor("breaking_error");
+		}
 	});
 
 	// Session end — opt-in (session_shutdown defaults to null).

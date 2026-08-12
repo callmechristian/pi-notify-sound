@@ -25,6 +25,10 @@ describe("parseTestTarget", () => {
 			kind: "event",
 			key: "session_shutdown",
 		});
+		expect(parseTestTarget("interrupt")).toEqual({
+			kind: "event",
+			key: "breaking_error",
+		});
 	});
 
 	it("treats anything else as a path", () => {
