@@ -1,33 +1,24 @@
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import { beforeEach, describe, expect, it, vi } from "vitest";
-import type { NotifySoundConfig } from "./types.js";
+import type { NotifyEventKey, NotifySoundConfig } from "./types.js";
 
 const fixedConfig: NotifySoundConfig = {
 	sound: true,
-	sounds: {
-		default: "d.wav",
-		complete: "c.wav",
-		question: "q.wav",
-		error: "e.wav",
-	},
 	events: {
-		agent_settled: { enabled: true, sound: "complete" },
-		ask_user_prompt: { enabled: true, sound: "question" },
-		permission_request: { enabled: false, sound: "question" },
+		agent_settled: { sound: "default" },
+		ask_user_prompt: { sound: "default" },
+		permission_request: { sound: null },
 	},
 };
 
 vi.mock("./config.js", () => ({
 	loadConfig: () => fixedConfig,
-	resolveSoundPath: (cfg: NotifySoundConfig, sound?: string) => {
-		if (sound && sound in cfg.sounds)
-			return (
-				cfg.sounds[sound as keyof NotifySoundConfig["sounds"]] ||
-				cfg.sounds.default ||
-				null
-			);
-		if (sound) return sound;
-		return cfg.sounds.default || null;
+	resolveEventSound: (cfg: NotifySoundConfig, eventKey: NotifyEventKey) => {
+		if (!cfg.sound) return null;
+		const sound = cfg.events[eventKey]?.sound;
+		if (sound === null || sound === undefined) return null;
+		if (sound === "default") return "bundled-" + eventKey + ".wav";
+		return sound;
 	},
 }));
 
@@ -92,21 +83,21 @@ describe("wireEvents", () => {
 		);
 	});
 
-	it("plays the complete sound on agent_settled", () => {
+	it("plays the bundled default sound on agent_settled", () => {
 		const pi = makePi();
 		wire(pi);
 		handlerFor(pi, "agent_settled")();
-		expect(playSound).toHaveBeenCalledWith("c.wav");
+		expect(playSound).toHaveBeenCalledWith("bundled-agent_settled.wav");
 	});
 
-	it("plays the question sound on ask-user prompt", () => {
+	it("plays the bundled default sound on ask-user prompt", () => {
 		const pi = makePi();
 		wire(pi);
 		handlerFor(pi, "rpiv:ask-user:prompt")({});
-		expect(playSound).toHaveBeenCalledWith("q.wav");
+		expect(playSound).toHaveBeenCalledWith("bundled-ask_user_prompt.wav");
 	});
 
-	it("does not play for a disabled event", () => {
+	it("does not play for a disabled event (sound: null)", () => {
 		const pi = makePi();
 		wire(pi);
 		handlerFor(pi, "permissions:ui_prompt")({});

@@ -36,41 +36,44 @@ sounds twice per event.
 
 ## Config
 
-`~/.pi/notify-sound/config.json`. The extension ships with bundled sounds
-(`src/sounds/`), so a fresh install plays out of the box — the config only needs
-to exist if you want to override them:
+**Optional.** The extension ships with bundled sounds (`src/sounds/`) and works
+with no config file at all. A template is written to
+`~/.pi/notify-sound/config.json` on first run — every event defaults to its
+bundled sound:
 
 ```json
 {
   "sound": true,
   "events": {
-    "agent_settled":       { "enabled": true, "sound": "complete" },
-    "ask_user_prompt":     { "enabled": true, "sound": "question" },
-    "permission_request":  { "enabled": true, "sound": "question" }
+    "agent_settled":       { "sound": "default" },
+    "ask_user_prompt":     { "sound": "default" },
+    "permission_request":  { "sound": "default" }
   }
 }
 ```
 
 - `sound: false` mutes everything.
-- `sounds` maps a name to an absolute wav path (optional — bundled sounds are
-  the default). `default` is the fallback when an event has no `sound` set.
-- Each `events.<key>.sound` is either a key into `sounds` or a direct wav path.
+- Each `events.<key>.sound` is one of:
+  - `"default"` — the bundled default sound for that event
+    (agent done → studio-grand notification; questions/permissions → dingding)
+  - `null` — disabled, no sound
+  - an absolute wav path — a custom sound (missing files fall back to the bundled default)
 - Config is read at fire-time — edits apply without a reload.
 
 ## Bundled sounds
 
 The package bundles two short freesound.org samples:
 
-- `studio-grand-notification.wav` — complete / error / default
+- `studio-grand-notification.wav` — agent done (`sound: "default"`)
 - `dingding.wav` — questions and permission prompts
 
-Override any of them via `sounds` in the config with your own wav paths.
+Override with a custom wav path per event, or disable an event with `null`.
 
 ## Verify
 
 `/notify-sound` — shows current config.
-`/notify-sound test` — plays the default sound.
-`/notify-sound test question` — plays the question sound (or pass a path).
+`/notify-sound test` — plays the agent-done sound.
+`/notify-sound test question` — plays the question sound (`/notify-sound test done|permission` work too; pass a wav path to play it directly).
 
 ## Playback notes
 

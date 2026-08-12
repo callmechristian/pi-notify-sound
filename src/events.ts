@@ -15,7 +15,7 @@
  */
 
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
-import { loadConfig, resolveSoundPath } from "./config.js";
+import { loadConfig, resolveEventSound } from "./config.js";
 import { playSound } from "./sound.js";
 import type { NotifyEventKey } from "./types.js";
 
@@ -26,41 +26,38 @@ const PERMISSION_UI_PROMPT_EVENT = "permissions:ui_prompt" as const;
 let unsubs: Array<() => void> = [];
 
 function clearEventBusListeners(): void {
-  for (const unsub of unsubs) {
-    try { unsub(); } catch { /* ignore */ }
-  }
-  unsubs = [];
+	for (const unsub of unsubs) {
+		try { unsub(); } catch { /* ignore */ }
+	}
+	unsubs = [];
 }
 
 /** Play the sound configured for an event key. Reads config at fire-time. */
 function playFor(eventKey: NotifyEventKey): void {
-  try {
-    const config = loadConfig();
-    if (!config.sound) return;
-    const ev = config.events[eventKey];
-    if (!ev?.enabled) return;
-    const path = resolveSoundPath(config, ev.sound);
-    if (path) playSound(path);
-  } catch {
-    // Never let sound wiring break the event loop.
-  }
+	try {
+		const config = loadConfig();
+		const path = resolveEventSound(config, eventKey);
+		if (path) playSound(path);
+	} catch {
+		// Never let sound wiring break the event loop.
+	}
 }
 
 /** Register all listeners. Safe to call on every extension (re)load. */
 export function wireEvents(pi: ExtensionAPI): void {
-  clearEventBusListeners();
+	clearEventBusListeners();
 
-  // Agent fully settled — no automatic retry/compaction/follow-up pending.
-  pi.on("agent_settled", () => playFor("agent_settled"));
+	// Agent fully settled — no automatic retry/compaction/follow-up pending.
+	pi.on("agent_settled", () => playFor("agent_settled"));
 
-  // Questionnaire awaiting user input.
-  unsubs.push(pi.events.on(ASK_USER_PROMPT_EVENT, () => playFor("ask_user_prompt")));
+	// Questionnaire awaiting user input.
+	unsubs.push(pi.events.on(ASK_USER_PROMPT_EVENT, () => playFor("ask_user_prompt")));
 
-  // Permission prompt awaiting a human decision (if that extension is present).
-  unsubs.push(pi.events.on(PERMISSION_UI_PROMPT_EVENT, () => playFor("permission_request")));
+	// Permission prompt awaiting a human decision (if that extension is present).
+	unsubs.push(pi.events.on(PERMISSION_UI_PROMPT_EVENT, () => playFor("permission_request")));
 }
 
 /** Called on session_shutdown to release pi.events.on listeners. */
 export function unwireEvents(): void {
-  clearEventBusListeners();
+	clearEventBusListeners();
 }
