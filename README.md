@@ -30,10 +30,22 @@ pi install git:github.com/callmechristian/pi-notify-sound
 Then run `/reload` in pi. The package lands in
 `~/.pi/agent/git/github.com/callmechristian/pi-notify-sound`.
 
+**Install from npm:**
+
+```bash
+pi install npm:pi-notify-sound
+```
+
+Needs a published release (see [Publishing to npm](#publishing-to-npm) below);
+then `/reload`.
+
 **Update after new releases:** `pi update pi-notify-sound` (or `pi update`),
 then `/reload`.
 
-**From npm:** `pi install npm:pi-notify-sound` works once the package is published.
+**Dev from a clone:** instead of `pi install`, junction the repo into
+`~/.pi/agent/extensions/notify-sound` (auto-discovered, hot-reload via
+`/reload`). Don't do both — the extension would register twice and play
+sounds twice per event.
 
 ## Publishing to npm
 
@@ -56,11 +68,6 @@ git push --follow-tags
 
 GitHub Actions builds and publishes `pi-notify-sound@<version>`; then
 `pi update pi-notify-sound` on the pi side.
-
-**Dev from a clone:** instead of `pi install`, junction the repo into
-`~/.pi/agent/extensions/notify-sound` (auto-discovered, hot-reload via
-`/reload`). Don't do both — the extension would register twice and play
-sounds twice per event.
 
 ## Config
 
