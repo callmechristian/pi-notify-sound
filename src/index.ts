@@ -9,6 +9,8 @@
  */
 
 import { existsSync } from "node:fs";
+import { dirname, join } from "node:path";
+import { fileURLToPath } from "node:url";
 import type { ExtensionAPI } from "@earendil-works/pi-coding-agent";
 import {
 	ALL_EVENT_KEYS,
@@ -18,7 +20,6 @@ import {
 	resolveEventSound,
 } from "./config.js";
 import {
-	resetPlaybackState,
 	setSessionCwd,
 	unwireEvents,
 	wireEvents,
@@ -39,6 +40,10 @@ export const EVENT_ALIASES: Record<string, NotifyEventKey> = {
 	session_shutdown: "session_shutdown",
 	exit: "session_shutdown",
 };
+
+/** This module's directory (src/); skills live one level up. */
+const MODULE_DIR = dirname(fileURLToPath(import.meta.url));
+const SKILLS_DIR = join(MODULE_DIR, "..", "skills");
 
 /** What a /notify-sound test argument means. */
 export type TestTarget =
@@ -76,7 +81,7 @@ export default function (pi: ExtensionAPI): void {
 	// wireEvents clears EventBus listeners first so nothing accumulates.
 	wireEvents(pi);
 
-	pi.on("session_start", (event, ctx) => {
+	pi.on("session_start", (_event, ctx) => {
 		// First run: write a config template so the user knows where to look.
 		ensureConfigFile();
 		// Per-project config only applies to trusted projects.
@@ -86,6 +91,11 @@ export default function (pi: ExtensionAPI): void {
 	pi.on("session_shutdown", () => {
 		unwireEvents();
 	});
+
+	// Expose the bundled setup skill (skills/notify-sound-setup) to pi.
+	pi.on("resources_discover", () => ({
+		skillPaths: [SKILLS_DIR],
+	}));
 
 	// /notify-sound test [event|path]  — play a sound to verify.
 	// /notify-sound (no args)          — show config status.

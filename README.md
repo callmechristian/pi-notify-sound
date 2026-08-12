@@ -4,6 +4,16 @@ A [pi](https://github.com/badlogic/pi-mono) extension that plays a sound when
 the agent finishes and when it waits for your input — so you can leave the
 terminal and still hear when it's your turn.
 
+## Quick start
+
+```bash
+pi install git:github.com/callmechristian/pi-notify-sound
+```
+
+Then in pi: `/reload`, then `/notify-sound test` to hear it. Config is
+optional — bundled sounds work out of the box. For guided configuration, ask
+pi for **notify-sound-setup** (a skill shipped with the extension).
+
 ## What triggers a sound
 
 | Moment | Event | Default sound |
