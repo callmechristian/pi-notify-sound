@@ -128,10 +128,27 @@ bundled sound:
 The package bundles two short freesound.org samples:
 
 - `dingding.wav` — the default for every event (`sound: "default"`)
-- `studio-grand-notification.wav` — reserved for tool errors (the `tool_error`
-  event plays it when a tool call fails)
+- `studio-grand-notification.wav` — the error sound: `breaking_error` by
+  default, and `tool_error` when you opt it in
 
-Override with a custom wav path per event, or disable an event with `null`.
+## Custom sounds
+
+Use your own wavs for any event — point the event's `sound` at an absolute path:
+
+```json
+{
+  "events": {
+    "agent_settled":   { "sound": "C:\\Users\\you\\sounds\\done.wav" },
+    "ask_user_prompt": { "sound": "C:\\Users\\you\\sounds\\question.wav" }
+  }
+}
+```
+
+- Any `.wav` works; short, simple samples (1–3 s) feel the snappiest.
+- A path that doesn't exist falls back to that event's bundled sound — no
+  silence, no errors.
+- Try any file before wiring it: `/notify-sound test C:\\path\\to\\sound.wav`.
+- Remove a sound entirely with `"sound": null` (disabled).
 
 ## Verify
 
