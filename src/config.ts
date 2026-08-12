@@ -16,63 +16,71 @@ export const CONFIG_PATH = join(CONFIG_DIR, "config.json");
 
 /** Defaults — no machine-specific paths; events enabled but silent until configured. */
 export const DEFAULT_CONFIG: NotifySoundConfig = {
-  sound: true,
-  sounds: { default: "", complete: "", question: "", error: "" },
-  events: {
-    agent_settled: { enabled: true, sound: "complete" },
-    ask_user_prompt: { enabled: true, sound: "question" },
-    permission_request: { enabled: true, sound: "question" },
-  },
+	sound: true,
+	sounds: { default: "", complete: "", question: "", error: "" },
+	events: {
+		agent_settled: { enabled: true, sound: "complete" },
+		ask_user_prompt: { enabled: true, sound: "question" },
+		permission_request: { enabled: true, sound: "question" },
+	},
 };
 
 /** Load config from disk, merged over defaults. Never throws. */
 export function loadConfig(path: string = CONFIG_PATH): NotifySoundConfig {
-  try {
-    if (existsSync(path)) {
-      const raw = JSON.parse(readFileSync(path, "utf8")) as Partial<NotifySoundConfig>;
-      return mergeWithDefaults(raw);
-    }
-  } catch {
-    // Config load failure — fall back to defaults.
-  }
-  return cloneDefaults();
+	try {
+		if (existsSync(path)) {
+			const raw = JSON.parse(
+				readFileSync(path, "utf8"),
+			) as Partial<NotifySoundConfig>;
+			return mergeWithDefaults(raw);
+		}
+	} catch {
+		// Config load failure — fall back to defaults.
+	}
+	return cloneDefaults();
 }
 
 /** Write a config template (only if none exists) so the user knows where to look. */
 export function ensureConfigFile(path: string = CONFIG_PATH): void {
-  if (existsSync(path)) return;
-  try {
-    mkdirSync(dirname(path), { recursive: true });
-    writeFileSync(path, JSON.stringify(cloneDefaults(), null, 2) + "\n", "utf8");
-  } catch {
-    // Non-fatal.
-  }
+	if (existsSync(path)) return;
+	try {
+		mkdirSync(dirname(path), { recursive: true });
+		writeFileSync(
+			path,
+			JSON.stringify(cloneDefaults(), null, 2) + "\n",
+			"utf8",
+		);
+	} catch {
+		// Non-fatal.
+	}
 }
 
 /** Resolve an event's sound to an absolute path, or null when nothing should play. */
 export function resolveSoundPath(
-  config: NotifySoundConfig,
-  sound?: SoundKey | string
+	config: NotifySoundConfig,
+	sound?: SoundKey | string,
 ): string | null {
-  if (sound && sound in config.sounds) {
-    return config.sounds[sound as SoundKey] || config.sounds.default || null;
-  }
-  if (sound) return sound; // absolute path
-  return config.sounds.default || null;
+	if (sound && sound in config.sounds) {
+		return config.sounds[sound as SoundKey] || config.sounds.default || null;
+	}
+	if (sound) return sound; // absolute path
+	return config.sounds.default || null;
 }
 
-function mergeWithDefaults(loaded: Partial<NotifySoundConfig>): NotifySoundConfig {
-  return {
-    sound: loaded.sound ?? DEFAULT_CONFIG.sound,
-    sounds: { ...DEFAULT_CONFIG.sounds, ...loaded.sounds },
-    events: { ...DEFAULT_CONFIG.events, ...loaded.events },
-  };
+function mergeWithDefaults(
+	loaded: Partial<NotifySoundConfig>,
+): NotifySoundConfig {
+	return {
+		sound: loaded.sound ?? DEFAULT_CONFIG.sound,
+		sounds: { ...DEFAULT_CONFIG.sounds, ...loaded.sounds },
+		events: { ...DEFAULT_CONFIG.events, ...loaded.events },
+	};
 }
 
 function cloneDefaults(): NotifySoundConfig {
-  return {
-    ...DEFAULT_CONFIG,
-    sounds: { ...DEFAULT_CONFIG.sounds },
-    events: { ...DEFAULT_CONFIG.events },
-  };
+	return {
+		...DEFAULT_CONFIG,
+		sounds: { ...DEFAULT_CONFIG.sounds },
+		events: { ...DEFAULT_CONFIG.events },
+	};
 }
