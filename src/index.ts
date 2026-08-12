@@ -19,11 +19,7 @@ import {
 	loadEffectiveConfig,
 	resolveEventSound,
 } from "./config.js";
-import {
-	setSessionCwd,
-	unwireEvents,
-	wireEvents,
-} from "./events.js";
+import { setSessionCwd, unwireEvents, wireEvents } from "./events.js";
 import { playSound } from "./sound.js";
 import type { NotifyEventKey, NotifySoundConfig } from "./types.js";
 
