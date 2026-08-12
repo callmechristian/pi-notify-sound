@@ -46,3 +46,13 @@ src/index.ts wires events to playback. src/events.ts maps pi lifecycle and event
 - Write the minimum code that solves the stated problem. Nothing extra.
 - Run tests after every change. Show evidence before declaring done.
 - One clarifying question beats a wrong assumption baked into 200 lines.
+
+## Agent skills
+
+### Issue tracker
+
+Hybrid: defects found during implementation → local `specs/bugs/` (bigpowers); explicit issue-finding sessions and user-initiated issues → GitHub Issues. See `docs/agents/issue-tracker.md`.
+
+### Domain docs
+
+Single-context: one `CONTEXT.md` + `docs/adr/` at the repo root. See `docs/agents/domain.md`.
