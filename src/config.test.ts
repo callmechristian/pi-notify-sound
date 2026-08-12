@@ -22,7 +22,9 @@ function cleanup(path: string): void {
 	rmSync(join(path, ".."), { recursive: true, force: true });
 }
 
-function configWith(events: Partial<NotifySoundConfig["events"]>): NotifySoundConfig {
+function configWith(
+	events: Partial<NotifySoundConfig["events"]>,
+): NotifySoundConfig {
 	return { ...DEFAULT_CONFIG, events: { ...DEFAULT_CONFIG.events, ...events } };
 }
 

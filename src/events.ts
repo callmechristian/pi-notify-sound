@@ -27,7 +27,11 @@ let unsubs: Array<() => void> = [];
 
 function clearEventBusListeners(): void {
 	for (const unsub of unsubs) {
-		try { unsub(); } catch { /* ignore */ }
+		try {
+			unsub();
+		} catch {
+			/* ignore */
+		}
 	}
 	unsubs = [];
 }
@@ -51,10 +55,16 @@ export function wireEvents(pi: ExtensionAPI): void {
 	pi.on("agent_settled", () => playFor("agent_settled"));
 
 	// Questionnaire awaiting user input.
-	unsubs.push(pi.events.on(ASK_USER_PROMPT_EVENT, () => playFor("ask_user_prompt")));
+	unsubs.push(
+		pi.events.on(ASK_USER_PROMPT_EVENT, () => playFor("ask_user_prompt")),
+	);
 
 	// Permission prompt awaiting a human decision (if that extension is present).
-	unsubs.push(pi.events.on(PERMISSION_UI_PROMPT_EVENT, () => playFor("permission_request")));
+	unsubs.push(
+		pi.events.on(PERMISSION_UI_PROMPT_EVENT, () =>
+			playFor("permission_request"),
+		),
+	);
 }
 
 /** Called on session_shutdown to release pi.events.on listeners. */

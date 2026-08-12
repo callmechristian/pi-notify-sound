@@ -29,6 +29,9 @@ pi install git:github.com/callmechristian/pi-notify-sound
 Then run `/reload` in pi. The package lands in
 `~/.pi/agent/git/github.com/callmechristian/pi-notify-sound`.
 
+**Update after new releases:** `pi update pi-notify-sound` (or `pi update`),
+then `/reload`.
+
 **Dev from a clone:** instead of `pi install`, junction the repo into
 `~/.pi/agent/extensions/notify-sound` (auto-discovered, hot-reload via
 `/reload`). Don't do both — the extension would register twice and play
