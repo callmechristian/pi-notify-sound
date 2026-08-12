@@ -15,25 +15,28 @@ import { platform } from "node:os";
 
 /** Play a wav file fire-and-forget. Returns immediately. */
 export function playSound(path: string): void {
-  if (!path || !existsSync(path)) return;
-  try {
-    const os = platform();
-    if (os === "win32") playWindows(path);
-    else if (os === "darwin") spawnDetached("afplay", [path]);
-    else spawnDetached("paplay", [path]);
-  } catch {
-    // Sound playback failure is non-blocking.
-  }
+	if (!path || !existsSync(path)) return;
+	try {
+		const os = platform();
+		if (os === "win32") playWindows(path);
+		else if (os === "darwin") spawnDetached("afplay", [path]);
+		else spawnDetached("paplay", [path]);
+	} catch {
+		// Sound playback failure is non-blocking.
+	}
 }
 
 /** Windows: args-array spawn (no shell), detached hidden PowerShell, PlaySync. */
 function playWindows(path: string): void {
-  const script = "[System.Media.SoundPlayer]::new('" + path.replace(/'/g, "''") + "').PlaySync()";
-  spawn(
-    "powershell.exe",
-    ["-NoProfile", "-WindowStyle", "Hidden", "-Command", script],
-    { stdio: "ignore", windowsHide: true }
-  ).unref();
+	const script =
+		"[System.Media.SoundPlayer]::new('" +
+		path.replace(/'/g, "''") +
+		"').PlaySync()";
+	spawn(
+		"powershell.exe",
+		["-NoProfile", "-WindowStyle", "Hidden", "-Command", script],
+		{ stdio: "ignore", windowsHide: true },
+	).unref();
 }
 
 /**
@@ -43,12 +46,13 @@ function playWindows(path: string): void {
  * child from SIGHUP when pi exits.
  */
 function spawnDetached(file: string, args: string[]): void {
-  const opts = platform() === "win32"
-    ? { stdio: "ignore" as const, windowsHide: true }
-    : { stdio: "ignore" as const, detached: true };
-  const child = spawn(file, args, opts);
-  child.on("error", () => {
-    if (file === "paplay") spawnDetached("aplay", args);
-  });
-  child.unref();
+	const opts =
+		platform() === "win32"
+			? { stdio: "ignore" as const, windowsHide: true }
+			: { stdio: "ignore" as const, detached: true };
+	const child = spawn(file, args, opts);
+	child.on("error", () => {
+		if (file === "paplay") spawnDetached("aplay", args);
+	});
+	child.unref();
 }
