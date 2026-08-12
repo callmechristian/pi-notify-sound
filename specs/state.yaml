@@ -4,7 +4,7 @@ active_flow: bootstrap
 session:
   project: pi-notify-sound
   git:
-    branch: master
+    branch: main
     clean: true
   handoff:
     next_skill: survey-context

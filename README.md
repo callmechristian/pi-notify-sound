@@ -17,20 +17,22 @@ before pi decides whether to auto-retry, compact-and-retry, or run follow-ups.
 
 ## Install
 
-The extension is zero-dependency (Node built-ins only). Point pi at the repo
-however you prefer:
+The extension is zero-dependency (Node built-ins only) and ships its own
+notification sounds (`src/sounds/`).
 
-- **Junction (dev, hot-reload via `/reload`):**
+**Install from GitHub:**
 
-  ```powershell
-  mklink /J "%USERPROFILE%\.pi\agent\extensions\notify-sound" "E:\Projects\pi-notify-sound"
-  ```
+```bash
+pi install git:github.com/callmechristian/pi-notify-sound
+```
 
-- **Copy:** put the repo (or `src/`) under `~/.pi/agent/extensions/notify-sound/`.
-- **pi package:** `pi install git:<this-repo-url>` once it has a remote
-  (`pi.extensions` is declared in `package.json`).
+Then run `/reload` in pi. The package lands in
+`~/.pi/agent/git/github.com/callmechristian/pi-notify-sound`.
 
-Then run `/reload` in pi.
+**Dev from a clone:** instead of `pi install`, junction the repo into
+`~/.pi/agent/extensions/notify-sound` (auto-discovered, hot-reload via
+`/reload`). Don't do both — the extension would register twice and play
+sounds twice per event.
 
 ## Config
 
