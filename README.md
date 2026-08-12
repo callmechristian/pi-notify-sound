@@ -33,6 +33,30 @@ Then run `/reload` in pi. The package lands in
 **Update after new releases:** `pi update pi-notify-sound` (or `pi update`),
 then `/reload`.
 
+**From npm:** `pi install npm:pi-notify-sound` works once the package is published.
+
+## Publishing to npm
+
+Releases publish automatically to npm via GitHub Actions (`.github/workflows/publish.yml`),
+triggered by any `v*` tag. The workflow verifies (`npm ci` → `npm test` →
+`npm run typecheck`) and publishes with npm trusted publishing (OIDC +
+provenance) — no token secret needed.
+
+**One-time npm setup (trusted publishing):**
+
+1. npmjs.com → Access → **Trusted Publishers** → Add publisher
+2. GitHub repo: `callmechristian/pi-notify-sound` (workflow: `publish`)
+
+**Release flow:**
+
+```bash
+npm version patch -m "chore: release v%s"
+git push --follow-tags
+```
+
+GitHub Actions builds and publishes `pi-notify-sound@<version>`; then
+`pi update pi-notify-sound` on the pi side.
+
 **Dev from a clone:** instead of `pi install`, junction the repo into
 `~/.pi/agent/extensions/notify-sound` (auto-discovered, hot-reload via
 `/reload`). Don't do both — the extension would register twice and play

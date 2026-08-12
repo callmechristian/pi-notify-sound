@@ -23,6 +23,17 @@
   },
   "scripts": {
     "test": "vitest run",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "prepublishOnly": "npm test && npm run typecheck"
+  },
+  "files": [
+    "src"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/callmechristian/pi-notify-sound.git"
+  },
+  "engines": {
+    "node": ">=18"
   }
 }
