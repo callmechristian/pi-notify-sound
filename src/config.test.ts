@@ -106,8 +106,12 @@ describe("resolveSoundPath", () => {
 	});
 
 	it("resolves bundled defaults for every sound key", () => {
-		expect(resolveSoundPath(DEFAULT_CONFIG, "complete")).toMatch(/studio-grand-notification\.wav$/);
-		expect(resolveSoundPath(DEFAULT_CONFIG, "question")).toMatch(/dingding\.wav$/);
+		expect(resolveSoundPath(DEFAULT_CONFIG, "complete")).toMatch(
+			/studio-grand-notification\.wav$/,
+		);
+		expect(resolveSoundPath(DEFAULT_CONFIG, "question")).toMatch(
+			/dingding\.wav$/,
+		);
 		expect(resolveSoundPath(DEFAULT_CONFIG, "error")).toMatch(/\.wav$/);
 		expect(resolveSoundPath(DEFAULT_CONFIG)).toMatch(/\.wav$/);
 	});

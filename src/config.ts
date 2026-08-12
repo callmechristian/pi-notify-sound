@@ -34,7 +34,9 @@ export const DEFAULT_CONFIG: NotifySoundConfig = {
 	sound: true,
 	sounds: {
 		default: bundledSoundPath("818998__allesyt__studio-grand-notification.wav"),
-		complete: bundledSoundPath("818998__allesyt__studio-grand-notification.wav"),
+		complete: bundledSoundPath(
+			"818998__allesyt__studio-grand-notification.wav",
+		),
 		question: bundledSoundPath("723291__glitched7777__dingding.wav"),
 		error: bundledSoundPath("818998__allesyt__studio-grand-notification.wav"),
 	},
