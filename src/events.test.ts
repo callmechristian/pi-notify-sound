@@ -184,7 +184,10 @@ describe("wireEvents", () => {
 	it("plays the breaking sound when the run ends with a provider error", async () => {
 		const pi = makePi();
 		wire(pi);
-		await handlerFor(pi, "agent_end")({
+		await handlerFor(
+			pi,
+			"agent_end",
+		)({
 			messages: [
 				{ role: "user", content: "x" },
 				{ role: "assistant", stopReason: "error" },
@@ -196,7 +199,10 @@ describe("wireEvents", () => {
 	it("plays the breaking sound when the run is aborted", async () => {
 		const pi = makePi();
 		wire(pi);
-		await handlerFor(pi, "agent_end")({
+		await handlerFor(
+			pi,
+			"agent_end",
+		)({
 			messages: [{ role: "assistant", stopReason: "aborted" }],
 		});
 		expect(playSound).toHaveBeenCalledWith("bundled-breaking_error.wav");
@@ -207,7 +213,10 @@ describe("wireEvents", () => {
 		wire(pi);
 		for (const stopReason of ["stop", "tool_use", "length", undefined]) {
 			playSound.mockClear();
-			await handlerFor(pi, "agent_end")({
+			await handlerFor(
+				pi,
+				"agent_end",
+			)({
 				messages: [{ role: "assistant", stopReason }],
 			});
 			expect(playSound).not.toHaveBeenCalled();
