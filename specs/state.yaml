@@ -1,0 +1,13 @@
+# bigpowers session state — pi-notify-sound
+workflow_mode: solo-git
+active_flow: bootstrap
+session:
+  project: pi-notify-sound
+  git:
+    branch: master
+    clean: true
+  handoff:
+    next_skill: seed-conventions
+release:
+  last_tag: null
+  last_publish: null

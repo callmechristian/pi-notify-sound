@@ -1,0 +1,7 @@
+# Release index — pi-notify-sound (seeded; populated by plan-release)
+release:
+  version: "0.1.0"
+  bump_hint: minor
+epics:
+  - id: e01
+    title: "Initial extension delivery (seeded placeholder)"
