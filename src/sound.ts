@@ -3,9 +3,9 @@
  *
  * Fire-and-forget; never throws. Playback is detached so it never blocks pi.
  *
- * Windows: detached hidden PowerShell using [System.Media.SoundPlayer] via
- * PlaySync (proven reliable on this machine; keep wavs <= ~3s — long wavs
- * from a spawned process are silently dropped).
+ * Windows: hidden PowerShell using [System.Media.SoundPlayer] via PlaySync.
+ * NOT detached — a detached child gets a fresh console whose audio endpoint
+ * is unavailable, so PlaySync returns instantly without playing.
  * macOS: afplay. Linux: paplay, falling back to aplay.
  */
 
@@ -32,13 +32,21 @@ function playWindows(path: string): void {
   spawn(
     "powershell.exe",
     ["-NoProfile", "-WindowStyle", "Hidden", "-Command", script],
-    { stdio: "ignore", detached: true, windowsHide: true }
+    { stdio: "ignore", windowsHide: true }
   ).unref();
 }
 
-/** Spawn a detached process; on missing binary, try the Linux fallback once. */
+/**
+ * Spawn a background process; on missing binary, try the Linux fallback once.
+ * NOTE: detached:true on Windows breaks SoundPlayer audio (fresh console has
+ * no audio endpoint), so it is used only on POSIX where it protects the
+ * child from SIGHUP when pi exits.
+ */
 function spawnDetached(file: string, args: string[]): void {
-  const child = spawn(file, args, { stdio: "ignore", detached: true });
+  const opts = platform() === "win32"
+    ? { stdio: "ignore" as const, windowsHide: true }
+    : { stdio: "ignore" as const, detached: true };
+  const child = spawn(file, args, opts);
   child.on("error", () => {
     if (file === "paplay") spawnDetached("aplay", args);
   });

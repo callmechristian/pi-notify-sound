@@ -67,9 +67,10 @@ Then run `/reload` in pi.
 
 ## Playback notes
 
-- **Windows:** detached hidden PowerShell using `[System.Media.SoundPlayer]`
-  with `PlaySync()`, spawned with an args array (no shell). Keep wavs
-  **≤ ~3 seconds** — longer wavs from a spawned process play unreliably.
+- **Windows:** hidden PowerShell using `[System.Media.SoundPlayer]` with
+  `PlaySync()`, spawned with an args array (no shell). The child must NOT be
+  spawned `detached` — a detached child gets a fresh console whose audio
+  endpoint is unavailable, so `PlaySync()` returns instantly and nothing plays.
 - **macOS:** `afplay`. **Linux:** `paplay` (falls back to `aplay`).
 - Playback is fire-and-forget and never throws; a missing file or muted config
   is silently skipped.
